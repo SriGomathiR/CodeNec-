@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASA Space Biology Research Dashboard</title>
+    <style>
+        body {
+          box-sizing: border-box;
+        }
+
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+          min-height: 100vh;
+          overflow-x: hidden;
+          transition: all 0.5s ease;
+          color: #ffffff;
+        }
+
+        /* Dark Theme - Attractive Solid Colors */
+        body.dark-theme {
+          background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #1e293b 75%, #0f172a 100%);
+        }
+
+        /* Light Theme - Attractive Solid Colors */
+        body.light-theme {
+          background: linear-gradient(135deg, #fef3c7 0%, #fde68a 25%, #f59e0b 50%, #fde68a 75%, #fef3c7 100%);
+          color: #1f2937;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          z-index: 1000;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 50px;
+          padding: 8px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          backdrop-filter: blur(10px);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .theme-toggle:hover {
+          background: rgba(255, 255, 255, 0.2);
+          transform: scale(1.05);
+        }
+
+        .theme-icon {
+          font-size: 24px;
+          transition: all 0.3s ease;
+          padding: 8px;
+          border-radius: 50%;
+        }
+
+        .theme-icon.active {
+          background: rgba(255, 255, 255, 0.2);
+          transform: scale(1.1);
+        }
+
+        .app {
+          min-height: 100vh;
+          position: relative;
+          z-index: 1;
+        }
+
+        .header {
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(10px);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          padding: 1.5rem 2rem;
+          position: sticky;
+          top: 0;
+          z-index: 100;
+        }
+
+        .header h1 {
+          margin: 0;
+          font-size: 1.8rem;
+          font-weight: 700;
+          color: #ffffff;
+        }
+
+        .light-theme .header h1 {
+          color: #1f2937;
+        }
+
+        .header-subtitle {
+          margin-top: 0.5rem;
+          font-size: 0.9rem;
+          color: #ffffff;
+          display: flex;
+          gap: 1rem;
+        }
+
+        .light-theme .header-subtitle {
+          color: #1f2937;
+        }
+
+        .main-container {
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: 2rem;
+        }
+
+        .audience-selector {
+          margin-bottom: 2rem;
+        }
+
+        .audience-title {
+          margin-bottom: 1rem;
+          color: #ffffff;
+          font-weight: 600;
+        }
+
+        .light-theme .audience-title {
+          color: #1f2937;
+        }
+
+        .audience-buttons {
+          display: flex;
+          gap: 1rem;
+          flex-wrap: wrap;
+        }
+
+        .audience-btn {
+          flex: 1;
+          min-width: 200px;
+          padding: 1rem;
+          border: 2px solid rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.05);
+          color: #ffffff;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          text-align: left;
+          font-size: 1rem;
+          font-weight: 600;
+        }
+
+        .light-theme .audience-btn {
+          border: 2px solid rgba(31, 41, 55, 0.1);
+          background: rgba(31, 41, 55, 0.05);
+          color: #1f2937;
+        }
+
+        .audience-btn span {
+          display: block;
+          font-size: 0.8rem;
+          font-weight: 400;
+          color: #ffffff;
+          margin-top: 0.25rem;
+          opacity: 0.8;
+        }
+
+        .light-theme .audience-btn span {
+          color: #1f2937;
+        }
+
+        .audience-btn:hover {
+          border-color: rgba(96, 165, 250, 0.5);
+          background: rgba(96, 165, 250, 0.1);
+          transform: translateY(-2px);
+        }
+
+        .audience-btn.active {
+          border-color: #60a5fa;
+          background: rgba(96, 165, 250, 0.2);
+          box-shadow: 0 4px 20px rgba(96, 165, 250, 0.3);
+        }
+
+        .search-section {
+          margin-bottom: 2rem;
+        }
+
+        .search-container {
+          position: relative;
+          margin-bottom: 1rem;
+        }
+
+        .search-input {
+          width: 100%;
+          padding: 1rem 1rem 1rem 3rem;
+          font-size: 1.1rem;
+          border: 2px solid rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.05);
+          color: #ffffff;
+          backdrop-filter: blur(10px);
+          transition: all 0.3s ease;
+        }
+
+        .light-theme .search-input {
+          border: 2px solid rgba(31, 41, 55, 0.1);
+          background: rgba(31, 41, 55, 0.05);
+          color: #1f2937;
+        }
+
+        .search-input:focus {
+          outline: none;
+          border-color: #60a5fa;
+          box-shadow: 0 0 20px rgba(96, 165, 250, 0.3);
+        }
+
+        .search-input::placeholder {
+          color: #ffffff;
+          opacity: 0.7;
+        }
+
+        .light-theme .search-input::placeholder {
+          color: #1f2937;
+        }
+
+        .search-icon {
+          position: absolute;
+          left: 1rem;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #ffffff;
+        }
+
+        .light-theme .search-icon {
+          color: #1f2937;
+        }
+
+        .content-grid {
+          display: grid;
+          grid-template-columns: 1fr 400px;
+          gap: 2rem;
+        }
+
+        .results-section {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+
+        .summary-card {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          padding: 1.5rem;
+          backdrop-filter: blur(10px);
+          transition: all 0.3s ease;
+          cursor: pointer;
+        }
+
+        .light-theme .summary-card {
+          background: rgba(31, 41, 55, 0.05);
+          border: 1px solid rgba(31, 41, 55, 0.1);
+        }
+
+        .summary-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+          border-color: rgba(96, 165, 250, 0.3);
+        }
+
+        .card-expanded {
+          background: rgba(96, 165, 250, 0.1);
+          border-color: #60a5fa;
+        }
+
+        .card-title {
+          font-size: 1.2rem;
+          font-weight: 600;
+          margin-bottom: 0.75rem;
+          color: #ffffff;
+        }
+
+        .light-theme .card-title {
+          color: #1f2937;
+        }
+
+        .card-meta {
+          display: flex;
+          gap: 1rem;
+          margin-bottom: 1rem;
+          font-size: 0.85rem;
+          color: #ffffff;
+          flex-wrap: wrap;
+          opacity: 0.8;
+        }
+
+        .light-theme .card-meta {
+          color: #1f2937;
+        }
+
+        .card-summary {
+          line-height: 1.6;
+          color: #ffffff;
+          margin-bottom: 1rem;
+        }
+
+        .light-theme .card-summary {
+          color: #1f2937;
+        }
+
+        .expanded-content {
+          margin-top: 1rem;
+          padding-top: 1rem;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .light-theme .expanded-content {
+          border-top: 1px solid rgba(31, 41, 55, 0.1);
+        }
+
+        .section-tabs {
+          display: flex;
+          gap: 0.5rem;
+          margin-bottom: 1rem;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          padding-bottom: 0.5rem;
+        }
+
+        .light-theme .section-tabs {
+          border-bottom: 1px solid rgba(31, 41, 55, 0.1);
+        }
+
+        .section-tab {
+          padding: 0.5rem 1rem;
+          border-radius: 6px;
+          background: rgba(255, 255, 255, 0.05);
+          color: #ffffff;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          font-size: 0.9rem;
+          opacity: 0.7;
+        }
+
+        .light-theme .section-tab {
+          background: rgba(31, 41, 55, 0.05);
+          color: #1f2937;
+        }
+
+        .section-tab:hover {
+          background: rgba(255, 255, 255, 0.1);
+          color: #ffffff;
+          opacity: 1;
+        }
+
+        .light-theme .section-tab:hover {
+          background: rgba(31, 41, 55, 0.1);
+          color: #1f2937;
+        }
+
+        .section-tab.active {
+          background: #60a5fa;
+          color: white;
+          opacity: 1;
+        }
+
+        .visual-summary {
+          background: rgba(16, 185, 129, 0.1);
+          border: 1px solid rgba(16, 185, 129, 0.3);
+          border-radius: 8px;
+          padding: 1rem;
+        }
+
+        .visual-icons {
+          display: flex;
+          justify-content: space-around;
+          margin: 1rem 0;
+        }
+
+        .visual-icon {
+          text-align: center;
+        }
+
+        .visual-icon div:first-child {
+          font-size: 2rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .visual-icon div:last-child {
+          font-size: 0.8rem;
+          color: #ffffff;
+          opacity: 0.8;
+        }
+
+        .light-theme .visual-icon div:last-child {
+          color: #1f2937;
+        }
+
+        .hypothesis-highlight {
+          background: rgba(34, 197, 94, 0.1);
+          border: 1px solid rgba(34, 197, 94, 0.3);
+          border-radius: 8px;
+          padding: 1rem;
+          margin-top: 1rem;
+        }
+
+        .hypothesis-highlight h4 {
+          color: #ffffff;
+        }
+
+        .hypothesis-highlight p {
+          color: #ffffff;
+        }
+
+        .light-theme .hypothesis-highlight h4,
+        .light-theme .hypothesis-highlight p {
+          color: #1f2937;
+        }
+
+        .investment-opportunity {
+          background: rgba(245, 158, 11, 0.1);
+          border: 1px solid rgba(245, 158, 11, 0.3);
+          border-radius: 8px;
+          padding: 1rem;
+          margin-top: 1rem;
+        }
+
+        .investment-opportunity h4 {
+          color: #ffffff;
+        }
+
+        .investment-opportunity p {
+          color: #ffffff;
+        }
+
+        .light-theme .investment-opportunity h4,
+        .light-theme .investment-opportunity p {
+          color: #1f2937;
+        }
+
+        .mission-insight {
+          background: rgba(139, 92, 246, 0.1);
+          border: 1px solid rgba(139, 92, 246, 0.3);
+          border-radius: 8px;
+          padding: 1rem;
+          margin-top: 1rem;
+        }
+
+        .mission-insight h4 {
+          color: #ffffff;
+        }
+
+        .mission-insight p {
+          color: #ffffff;
+        }
+
+        .light-theme .mission-insight h4,
+        .light-theme .mission-insight p {
+          color: #1f2937;
+        }
+
+        /* Manager-specific styles */
+        .manager-dashboard {
+          display: none;
+        }
+
+        .manager-dashboard.active {
+          display: block;
+        }
+
+        .investment-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 1.5rem;
+          margin-bottom: 2rem;
+        }
+
+        .investment-card {
+          background: rgba(245, 158, 11, 0.1);
+          border: 2px solid rgba(245, 158, 11, 0.3);
+          border-radius: 12px;
+          padding: 1.5rem;
+          transition: all 0.3s ease;
+          cursor: pointer;
+        }
+
+        .investment-card:hover {
+          transform: translateY(-2px);
+          border-color: rgba(245, 158, 11, 0.6);
+          box-shadow: 0 8px 32px rgba(245, 158, 11, 0.2);
+        }
+
+        .investment-title {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: #f59e0b;
+          margin-bottom: 0.5rem;
+        }
+
+        .investment-amount {
+          font-size: 1.5rem;
+          font-weight: bold;
+          color: #ffffff;
+          margin-bottom: 0.5rem;
+        }
+
+        .light-theme .investment-amount {
+          color: #1f2937;
+        }
+
+        .investment-roi {
+          font-size: 0.9rem;
+          color: #10b981;
+          margin-bottom: 1rem;
+        }
+
+        .investment-description {
+          font-size: 0.9rem;
+          color: #ffffff;
+          opacity: 0.8;
+          line-height: 1.4;
+        }
+
+        .light-theme .investment-description {
+          color: #1f2937;
+        }
+
+        .funding-analysis {
+          background: rgba(139, 92, 246, 0.1);
+          border: 1px solid rgba(139, 92, 246, 0.3);
+          border-radius: 12px;
+          padding: 1.5rem;
+          margin-bottom: 2rem;
+        }
+
+        .funding-chart {
+          height: 200px;
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 1rem 0;
+          position: relative;
+        }
+
+        .chart-placeholder {
+          color: #ffffff;
+          opacity: 0.6;
+          text-align: center;
+        }
+
+        .light-theme .chart-placeholder {
+          color: #1f2937;
+        }
+
+        .priority-matrix {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1rem;
+          margin-top: 1rem;
+        }
+
+        .priority-item {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 8px;
+          padding: 1rem;
+          text-align: center;
+        }
+
+        .light-theme .priority-item {
+          background: rgba(31, 41, 55, 0.05);
+        }
+
+        .priority-score {
+          font-size: 2rem;
+          font-weight: bold;
+          color: #60a5fa;
+          margin-bottom: 0.5rem;
+        }
+
+        .priority-label {
+          font-size: 0.9rem;
+          color: #ffffff;
+          opacity: 0.8;
+        }
+
+        .light-theme .priority-label {
+          color: #1f2937;
+        }
+
+        .action-buttons {
+          display: flex;
+          gap: 1rem;
+          margin-top: 1rem;
+          flex-wrap: wrap;
+        }
+
+        .action-btn {
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
+          border: none;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-size: 0.9rem;
+        }
+
+        .action-btn.primary {
+          background: #10b981;
+          color: white;
+        }
+
+        .action-btn.primary:hover {
+          background: #059669;
+          transform: translateY(-1px);
+        }
+
+        .action-btn.secondary {
+          background: rgba(255, 255, 255, 0.1);
+          color: #ffffff;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .light-theme .action-btn.secondary {
+          color: #1f2937;
+          border: 1px solid rgba(31, 41, 55, 0.2);
+        }
+
+        .action-btn.secondary:hover {
+          background: rgba(255, 255, 255, 0.2);
+          transform: translateY(-1px);
+        }
+
+        .sidebar {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+
+        .widget {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          padding: 1.5rem;
+          backdrop-filter: blur(10px);
+        }
+
+        .light-theme .widget {
+          background: rgba(31, 41, 55, 0.05);
+          border: 1px solid rgba(31, 41, 55, 0.1);
+        }
+
+        .widget-title {
+          font-size: 1.1rem;
+          font-weight: 600;
+          margin-bottom: 1rem;
+          color: #ffffff;
+        }
+
+        .light-theme .widget-title {
+          color: #1f2937;
+        }
+
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1rem;
+          margin-bottom: 1rem;
+        }
+
+        .stat-item {
+          text-align: center;
+          padding: 1rem;
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 8px;
+        }
+
+        .light-theme .stat-item {
+          background: rgba(31, 41, 55, 0.05);
+        }
+
+        .stat-number {
+          font-size: 1.5rem;
+          font-weight: bold;
+          color: #60a5fa;
+        }
+
+        .stat-label {
+          font-size: 0.8rem;
+          color: #ffffff;
+          margin-top: 0.25rem;
+          opacity: 0.8;
+        }
+
+        .light-theme .stat-label {
+          color: #1f2937;
+        }
+
+        .topic-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+
+        .topic-item {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.5rem;
+          border-radius: 6px;
+          background: rgba(255, 255, 255, 0.02);
+          font-size: 0.9rem;
+          color: #ffffff;
+        }
+
+        .light-theme .topic-item {
+          background: rgba(31, 41, 55, 0.02);
+          color: #1f2937;
+        }
+
+        .topic-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+          .content-grid {
+            grid-template-columns: 1fr;
+          }
+          
+          .audience-buttons {
+            flex-direction: column;
+          }
+          
+          .audience-btn {
+            min-width: auto;
+          }
+          
+          .card-meta {
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+
+          .investment-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .priority-matrix {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .main-container {
+            padding: 1rem;
+          }
+          
+          .header {
+            padding: 1rem;
+          }
+          
+          .header h1 {
+            font-size: 1.5rem;
+          }
+          
+          .header-subtitle {
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+
+          .action-buttons {
+            flex-direction: column;
+          }
+        }
+    </style>
+</head>
+<body class="dark-theme">
+    <div class="theme-toggle" onclick="toggleTheme()">
+        <div class="theme-icon" id="darkIcon">🌙</div>
+        <div class="theme-icon active" id="lightIcon">☀️</div>
+    </div>
+
+    <div class="app">
+        <header class="header">
+            <h1>NASA Space Biology Research Dashboard</h1>
+            <div class="header-subtitle">
+                <span>📊 608 Publications Analyzed</span>
+                <span>🧬 Bioscience Research</span>
+                <span>🚀 Mission Planning Support</span>
+            </div>
+        </header>
+
+        <div class="main-container">
+            <div class="audience-selector">
+                <h2 class="audience-title">Select Your Role</h2>
+                <div class="audience-buttons">
+                    <button class="audience-btn" onclick="selectAudience('scientist')">
+                        🔬 Scientist
+                        <span>Generate new hypotheses and explore research gaps</span>
+                    </button>
+                    <button class="audience-btn" onclick="selectAudience('manager')">
+                        💼 Manager
+                        <span>Identify investment opportunities and strategic priorities</span>
+                    </button>
+                    <button class="audience-btn" onclick="selectAudience('architect')">
+                        🏗️ Mission Architect
+                        <span>Plan safe and efficient Moon and Mars missions</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="search-section">
+                <div class="search-container">
+                    <div class="search-icon">🔍</div>
+                    <input type="text" class="search-input" placeholder="Search NASA bioscience publications..." onkeyup="performSearch(event)">
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <div class="results-section">
+                    <!-- Default Content -->
+                    <div id="defaultContent">
+                        <div class="summary-card" onclick="toggleCard(this)">
+                            <div class="card-title">Microgravity Effects on Plant Growth Systems</div>
+                            <div class="card-meta">
+                                <span>📅 2023</span>
+                                <span>👥 15 Studies</span>
+                                <span>🌱 Plant Biology</span>
+                                <span>⭐ High Impact</span>
+                            </div>
+                            <div class="card-summary">
+                                Recent studies demonstrate significant adaptations in plant root systems and cellular metabolism under microgravity conditions. Key findings include altered gravitropic responses and modified nutrient uptake mechanisms that could impact food production systems for long-duration missions.
+                            </div>
+                        </div>
+
+                        <div class="summary-card" onclick="toggleCard(this)">
+                            <div class="card-title">Human Bone Density Changes in Space Environment</div>
+                            <div class="card-meta">
+                                <span>📅 2022-2023</span>
+                                <span>👥 23 Studies</span>
+                                <span>🦴 Human Physiology</span>
+                                <span>⚠️ Critical</span>
+                            </div>
+                            <div class="card-summary">
+                                Comprehensive analysis reveals accelerated bone loss rates in microgravity, with potential countermeasures including exercise protocols and pharmaceutical interventions. Critical for mission planning beyond 6 months duration.
+                            </div>
+                        </div>
+
+                        <div class="summary-card" onclick="toggleCard(this)">
+                            <div class="card-title">Radiation Effects on Cellular DNA Repair Mechanisms</div>
+                            <div class="card-meta">
+                                <span>📅 2021-2023</span>
+                                <span>👥 31 Studies</span>
+                                <span>🧬 Molecular Biology</span>
+                                <span>🔬 Research Gap</span>
+                            </div>
+                            <div class="card-summary">
+                                Space radiation exposure shows complex interactions with cellular repair pathways. Studies indicate both enhanced and impaired repair mechanisms depending on radiation type and dose, requiring further investigation for Mars mission planning.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Manager Dashboard -->
+                    <div id="managerContent" class="manager-dashboard">
+                        <div class="funding-analysis">
+                            <h3 class="widget-title">📊 Funding Analysis & ROI Projections</h3>
+                            <div class="funding-chart">
+                                <div class="chart-placeholder">
+                                    <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">Investment Portfolio Overview</div>
+                                    <div>Total Budget: $847M | Projected ROI: 340% | Risk Score: Medium</div>
+                                </div>
+                            </div>
+                            <div class="priority-matrix">
+                                <div class="priority-item">
+                                    <div class="priority-score">94</div>
+                                    <div class="priority-label">Mission Critical</div>
+                                </div>
+                                <div class="priority-item">
+                                    <div class="priority-score">78</div>
+                                    <div class="priority-label">High Impact</div>
+                                </div>
+                                <div class="priority-item">
+                                    <div class="priority-score">65</div>
+                                    <div class="priority-label">Innovation Potential</div>
+                                </div>
+                                <div class="priority-item">
+                                    <div class="priority-score">82</div>
+                                    <div class="priority-label">Commercial Value</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="investment-grid">
+                            <div class="investment-card" onclick="expandInvestment(this)">
+                                <div class="investment-title">🦴 Bone Density Countermeasures</div>
+                                <div class="investment-amount">$127M</div>
+                                <div class="investment-roi">+285% ROI Projected</div>
+                                <div class="investment-description">
+                                    Critical for missions >6 months. Current research shows 15% bone loss reduction with new protocols. High commercial potential for Earth-based osteoporosis treatments.
+                                </div>
+                                <div class="action-buttons">
+                                    <button class="action-btn primary" onclick="approveInvestment('bone-density')">Approve Funding</button>
+                                    <button class="action-btn secondary" onclick="requestMoreInfo('bone-density')">Request Details</button>
+                                </div>
+                            </div>
+
+                            <div class="investment-card" onclick="expandInvestment(this)">
+                                <div class="investment-title">🌱 Closed-Loop Food Systems</div>
+                                <div class="investment-amount">$89M</div>
+                                <div class="investment-roi">+420% ROI Projected</div>
+                                <div class="investment-description">
+                                    Essential for Mars missions. 23 studies show 40% improvement in crop yield efficiency. Massive Earth applications for sustainable agriculture and urban farming.
+                                </div>
+                                <div class="action-buttons">
+                                    <button class="action-btn primary" onclick="approveInvestment('food-systems')">Approve Funding</button>
+                                    <button class="action-btn secondary" onclick="requestMoreInfo('food-systems')">Request Details</button>
+                                </div>
+                            </div>
+
+                            <div class="investment-card" onclick="expandInvestment(this)">
+                                <div class="investment-title">🧬 Radiation Shielding Technology</div>
+                                <div class="investment-amount">$156M</div>
+                                <div class="investment-roi">+195% ROI Projected</div>
+                                <div class="investment-description">
+                                    Mission-critical for deep space exploration. Current materials show 60% radiation reduction. Applications in nuclear industry and medical imaging protection.
+                                </div>
+                                <div class="action-buttons">
+                                    <button class="action-btn primary" onclick="approveInvestment('radiation-shield')">Approve Funding</button>
+                                    <button class="action-btn secondary" onclick="requestMoreInfo('radiation-shield')">Request Details</button>
+                                </div>
+                            </div>
+
+                            <div class="investment-card" onclick="expandInvestment(this)">
+                                <div class="investment-title">🫀 Cardiovascular Adaptation Systems</div>
+                                <div class="investment-amount">$73M</div>
+                                <div class="investment-roi">+310% ROI Projected</div>
+                                <div class="investment-description">
+                                    Addresses 18% cardiac muscle atrophy in microgravity. New exercise protocols show promising results. High potential for cardiac rehabilitation on Earth.
+                                </div>
+                                <div class="action-buttons">
+                                    <button class="action-btn primary" onclick="approveInvestment('cardiovascular')">Approve Funding</button>
+                                    <button class="action-btn secondary" onclick="requestMoreInfo('cardiovascular')">Request Details</button>
+                                </div>
+                            </div>
+
+                            <div class="investment-card" onclick="expandInvestment(this)">
+                                <div class="investment-title">🧠 Cognitive Performance Enhancement</div>
+                                <div class="investment-amount">$94M</div>
+                                <div class="investment-roi">+275% ROI Projected</div>
+                                <div class="investment-description">
+                                    Critical for mission success and crew safety. Studies show 12% cognitive decline mitigation. Applications in aging research and neurodegenerative diseases.
+                                </div>
+                                <div class="action-buttons">
+                                    <button class="action-btn primary" onclick="approveInvestment('cognitive')">Approve Funding</button>
+                                    <button class="action-btn secondary" onclick="requestMoreInfo('cognitive')">Request Details</button>
+                                </div>
+                            </div>
+
+                            <div class="investment-card" onclick="expandInvestment(this)">
+                                <div class="investment-title">🦠 Microbial Ecosystem Management</div>
+                                <div class="investment-amount">$52M</div>
+                                <div class="investment-roi">+380% ROI Projected</div>
+                                <div class="investment-description">
+                                    Maintains crew health through microbiome balance. 31 studies show infection risk reduction. Revolutionary applications in personalized medicine and probiotics.
+                                </div>
+                                <div class="action-buttons">
+                                    <button class="action-btn primary" onclick="approveInvestment('microbial')">Approve Funding</button>
+                                    <button class="action-btn secondary" onclick="requestMoreInfo('microbial')">Request Details</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="summary-card">
+                            <div class="card-title">📈 Strategic Investment Summary</div>
+                            <div class="card-summary">
+                                Based on analysis of 608 NASA bioscience publications, the highest ROI opportunities combine mission-critical needs with significant commercial applications. Food systems and microbial management show exceptional dual-use potential, while bone density and radiation shielding are essential for mission success.
+                            </div>
+                            <div class="investment-opportunity">
+                                <h4>💡 Key Recommendation</h4>
+                                <p>Prioritize closed-loop food systems ($89M investment) for immediate funding. This addresses both Mars mission requirements and has massive commercial potential in sustainable agriculture, with projected 420% ROI over 5 years.</p>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="action-btn primary" onclick="generateReport()">Generate Full Report</button>
+                                <button class="action-btn secondary" onclick="scheduleReview()">Schedule Review Meeting</button>
+                                <button class="action-btn secondary" onclick="exportData()">Export Investment Data</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar">
+                    <div class="widget">
+                        <h3 class="widget-title">📊 Research Statistics</h3>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-number">608</div>
+                                <div class="stat-label">Publications</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">127</div>
+                                <div class="stat-label">Active Studies</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">23</div>
+                                <div class="stat-label">Research Areas</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">89%</div>
+                                <div class="stat-label">Mission Relevant</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="widget">
+                        <h3 class="widget-title">🔥 Trending Topics</h3>
+                        <div class="topic-list">
+                            <div class="topic-item">
+                                <div class="topic-dot" style="background: #ef4444;"></div>
+                                <span>Microgravity Bone Loss</span>
+                            </div>
+                            <div class="topic-item">
+                                <div class="topic-dot" style="background: #f59e0b;"></div>
+                                <span>Plant Growth Systems</span>
+                            </div>
+                            <div class="topic-item">
+                                <div class="topic-dot" style="background: #10b981;"></div>
+                                <span>Radiation Countermeasures</span>
+                            </div>
+                            <div class="topic-item">
+                                <div class="topic-dot" style="background: #3b82f6;"></div>
+                                <span>Cardiovascular Adaptation</span>
+                            </div>
+                            <div class="topic-item">
+                                <div class="topic-dot" style="background: #8b5cf6;"></div>
+                                <span>Cognitive Performance</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="widget">
+                        <h3 class="widget-title">🎯 Mission Priorities</h3>
+                        <div class="topic-list">
+                            <div class="topic-item">
+                                <div class="topic-dot" style="background: #ef4444;"></div>
+                                <span>Crew Health & Safety</span>
+                            </div>
+                            <div class="topic-item">
+                                <div class="topic-dot" style="background: #f59e0b;"></div>
+                                <span>Life Support Systems</span>
+                            </div>
+                            <div class="topic-item">
+                                <div class="topic-dot" style="background: #10b981;"></div>
+                                <span>Food Production</span>
+                            </div>
+                            <div class="topic-item">
+                                <div class="topic-dot" style="background: #3b82f6;"></div>
+                                <span>Environmental Control</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAudience = null;
+        let expandedCards = new Set();
+
+        function toggleTheme() {
+            const body = document.body;
+            const darkIcon = document.getElementById('darkIcon');
+            const lightIcon = document.getElementById('lightIcon');
+            
+            if (body.classList.contains('dark-theme')) {
+                body.classList.remove('dark-theme');
+                body.classList.add('light-theme');
+                darkIcon.classList.add('active');
+                lightIcon.classList.remove('active');
+            } else {
+                body.classList.remove('light-theme');
+                body.classList.add('dark-theme');
+                darkIcon.classList.remove('active');
+                lightIcon.classList.add('active');
+            }
+        }
+
+        function selectAudience(audience) {
+            // Remove active class from all buttons
+            document.querySelectorAll('.audience-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to selected button
+            event.target.classList.add('active');
+            currentAudience = audience;
+            
+            // Show appropriate content
+            if (audience === 'manager') {
+                document.getElementById('defaultContent').style.display = 'none';
+                document.getElementById('managerContent').classList.add('active');
+                updateSearchPlaceholder('Search investment opportunities, funding analysis, ROI projections...');
+            } else {
+                document.getElementById('defaultContent').style.display = 'block';
+                document.getElementById('managerContent').classList.remove('active');
+                if (audience === 'scientist') {
+                    updateSearchPlaceholder('Search research gaps, hypotheses, experimental data...');
+                } else if (audience === 'architect') {
+                    updateSearchPlaceholder('Search mission requirements, safety protocols, system designs...');
+                } else {
+                    updateSearchPlaceholder('Search NASA bioscience publications...');
+                }
+            }
+        }
+
+        function updateSearchPlaceholder(placeholder) {
+            document.querySelector('.search-input').placeholder = placeholder;
+        }
+
+        function performSearch(event) {
+            const query = event.target.value.toLowerCase();
+            if (event.key === 'Enter' && query.length > 0) {
+                // Simulate search functionality
+                console.log(`Searching for: ${query} as ${currentAudience || 'general user'}`);
+                
+                // Add visual feedback
+                event.target.style.borderColor = '#10b981';
+                setTimeout(() => {
+                    event.target.style.borderColor = '#60a5fa';
+                }, 1000);
+            }
+        }
+
+        function toggleCard(card) {
+            const cardId = Array.from(card.parentNode.children).indexOf(card);
+            
+            if (expandedCards.has(cardId)) {
+                card.classList.remove('card-expanded');
+                expandedCards.delete(cardId);
+                
+                // Remove expanded content if it exists
+                const expandedContent = card.querySelector('.expanded-content');
+                if (expandedContent) {
+                    expandedContent.remove();
+                }
+            } else {
+                card.classList.add('card-expanded');
+                expandedCards.add(cardId);
+                
+                // Add expanded content
+                const expandedContent = document.createElement('div');
+                expandedContent.className = 'expanded-content';
+                expandedContent.innerHTML = `
+                    <div class="section-tabs">
+                        <div class="section-tab active" onclick="switchTab(this, 'overview')">Overview</div>
+                        <div class="section-tab" onclick="switchTab(this, 'findings')">Key Findings</div>
+                        <div class="section-tab" onclick="switchTab(this, 'implications')">Implications</div>
+                    </div>
+                    <div class="tab-content">
+                        <div class="visual-summary">
+                            <div class="visual-icons">
+                                <div class="visual-icon">
+                                    <div>🧬</div>
+                                    <div>Molecular</div>
+                                </div>
+                                <div class="visual-icon">
+                                    <div>🔬</div>
+                                    <div>Cellular</div>
+                                </div>
+                                <div class="visual-icon">
+                                    <div>🫀</div>
+                                    <div>Systemic</div>
+                                </div>
+                                <div class="visual-icon">
+                                    <div>🚀</div>
+                                    <div>Mission</div>
+                                </div>
+                            </div>
+                        </div>
+                        ${currentAudience === 'scientist' ? `
+                            <div class="hypothesis-highlight">
+                                <h4>🔬 Research Hypothesis</h4>
+                                <p>Microgravity-induced changes in plant cellular metabolism may be reversible through targeted nutrient supplementation and controlled environmental conditions.</p>
+                            </div>
+                        ` : currentAudience === 'manager' ? `
+                            <div class="investment-opportunity">
+                                <h4>💰 Investment Opportunity</h4>
+                                <p>Plant growth systems represent a $2.3B market opportunity with applications in vertical farming, space missions, and sustainable agriculture. ROI projected at 340% over 5 years.</p>
+                            </div>
+                        ` : `
+                            <div class="mission-insight">
+                                <h4>🚀 Mission Insight</h4>
+                                <p>Plant growth systems are critical for missions exceeding 18 months. Current technology readiness level: 6/9. Requires 24 months additional development for Mars deployment.</p>
+                            </div>
+                        `}
+                    </div>
+                `;
+                card.appendChild(expandedContent);
+            }
+        }
+
+        function switchTab(tab, tabType) {
+            // Remove active class from all tabs in this card
+            const tabs = tab.parentNode.querySelectorAll('.section-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            tab.classList.add('active');
+            
+            // Update content based on tab type
+            const content = tab.parentNode.nextElementSibling;
+            // This would typically update the content based on the tab type
+            console.log(`Switched to ${tabType} tab`);
+        }
+
+        // Manager-specific functions
+        function expandInvestment(card) {
+            // Add visual feedback for investment card interaction
+            card.style.transform = 'translateY(-4px)';
+            setTimeout(() => {
+                card.style.transform = 'translateY(-2px)';
+            }, 200);
+        }
+
+        function approveInvestment(investmentType) {
+            event.stopPropagation();
+            alert(`✅ Investment approved for ${investmentType}! Funding request has been submitted for review.`);
+            
+            // Add visual feedback
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = '✅ Approved';
+            button.style.background = '#10b981';
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.background = '#10b981';
+            }, 2000);
+        }
+
+        function requestMoreInfo(investmentType) {
+            event.stopPropagation();
+            alert(`📋 Detailed analysis requested for ${investmentType}. Report will be generated within 24 hours.`);
+            
+            // Add visual feedback
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = '📋 Requested';
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+            }, 2000);
+        }
+
+        function generateReport() {
+            alert('📊 Comprehensive investment report is being generated. You will receive it via email within 30 minutes.');
+        }
+
+        function scheduleReview() {
+            alert('📅 Review meeting has been scheduled for next Tuesday at 2:00 PM EST. Calendar invite sent.');
+        }
+
+        function exportData() {
+            alert('📁 Investment data exported successfully. Download will begin shortly.');
+        }
+
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('NASA Space Biology Research Dashboard initialized');
+            console.log('608 publications loaded and analyzed');
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'989319c184526efe',t:'MTc1OTU2NDM1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
